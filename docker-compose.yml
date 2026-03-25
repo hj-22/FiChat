@@ -1,12 +1,13 @@
 services:
   db:
     image: mysql:8.0
-    container_name: my_pension_db
+    container_name: fichat
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: pension_db
     ports:
       - "3306:3306"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql_data:/var/lib/mysql
