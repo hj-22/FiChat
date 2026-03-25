@@ -28,6 +28,10 @@ CREATE TABLE product_variable (
     launch_date DATE,
     total_net_worth BIGINT,
     return_1y DECIMAL(10, 3),
+    return_3y DECIMAL(10, 3),
+    return_5y DECIMAL(10, 3),
+    return_7y DECIMAL(10, 3),
+    return_10y DECIMAL(10, 3),
     expense_ratio DECIMAL(5, 3),
     FOREIGN KEY (product_id) REFERENCES product_info(id)
 );
