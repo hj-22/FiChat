@@ -1,13 +1,15 @@
+SET NAMES utf8mb4;
+
 -- 1. 제공기관 및 사업자
 CREATE TABLE provider_info (
     id VARCHAR(20) PRIMARY KEY,
     provider_name VARCHAR(100) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE operator_info (
     id VARCHAR(20) PRIMARY KEY,
     operator_name VARCHAR(100) NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. 상품 마스터
 CREATE TABLE product_info (
@@ -17,7 +19,7 @@ CREATE TABLE product_info (
     provider_id VARCHAR(20),
     category ENUM('GUARANTEED', 'NON_GUARANTEED'),
     FOREIGN KEY (provider_id) REFERENCES provider_info(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. 보장/비보장형 상세 및 매핑 테이블
 CREATE TABLE product_fixed (
@@ -25,7 +27,7 @@ CREATE TABLE product_fixed (
     maturity INT,
     interest_rate DECIMAL(5, 2),
     FOREIGN KEY (id) REFERENCES product_info(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE product_variable (
     id VARCHAR(20) PRIMARY KEY,
@@ -40,7 +42,7 @@ CREATE TABLE product_variable (
     average_return_10y DECIMAL(10, 3),
     average_total_expense_ratio DECIMAL(5, 3),
     FOREIGN KEY (id) REFERENCES product_info(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE product_mapping (
     product_id VARCHAR(20),
@@ -49,7 +51,7 @@ CREATE TABLE product_mapping (
     PRIMARY KEY (product_id, operator_id, subscriber_type),
     FOREIGN KEY (product_id) REFERENCES product_info(id),
     FOREIGN KEY (operator_id) REFERENCES operator_info(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- ## data fill ## --
