@@ -5,7 +5,7 @@
 
 import os
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 # .env 파일 로드
@@ -39,15 +39,30 @@ def upload_excel_to_db(file_path):
     try:
         excel_data = pd.ExcelFile(file_path)
         print(f"파일 여는 중..")
+        
+        with engine.connect() as conn:
+            # 외래 키 체크 잠시 끄기
+            conn.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
+            
 
-        for sheet_name in excel_data.sheet_names:
-            if sheet_name.startswith("product_"):
-                df = pd.read_excel(file_path, sheet_name=sheet_name)
-                
-                # con: connection, pandas가 데이터를 어디로 보낼지 지정하는 매개변수
-                # df라는 데이터를 engine을 타고 가서 sheet_name이라는 테이블에 입력하세요
-                df.to_sql(name=sheet_name, con=engine, if_exists='replace', index=False)
-        print("\n 데이터를 성공적으로 입력했습니다!")
+            for sheet_name in excel_data.sheet_names:
+                if sheet_name.startswith("product_"):
+                    
+                    # 테이블 비우기
+                    # 아래 to_sql 문에서 replace를 쓰면 자체적으로 drop을 먼저 실행하는데
+                    # 이 경우 외래키 참조 문제가 생기기 때문
+                    conn.execute(text(f"TRUNCATE TABLE {sheet_name};"))
+                    
+                    df = pd.read_excel(file_path, sheet_name=sheet_name)
+                    
+                    # con: connection, pandas가 데이터를 어디로 보낼지 지정하는 매개변수
+                    # df라는 데이터를 engine을 타고 가서 sheet_name이라는 테이블에 입력하세요
+                    df.to_sql(name=sheet_name, con=engine, if_exists='append', index=False)
+                    
+            # 외래키 다시 켜기
+            conn.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
+            conn.commit()
+            print("\n 데이터를 성공적으로 업데이트했습니다!")
     
     except Exception as e:
         print(f"\n 오류 발생: {e}")

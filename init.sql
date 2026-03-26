@@ -40,7 +40,7 @@ CREATE TABLE product_variable (
     average_return_5y DECIMAL(10, 3),
     average_return_7y DECIMAL(10, 3),
     average_return_10y DECIMAL(10, 3),
-    average_total_expense_ratio DECIMAL(5, 3),
+    total_expense_ratio DECIMAL(5, 3),
     FOREIGN KEY (id) REFERENCES product_info(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
