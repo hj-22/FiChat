@@ -209,6 +209,9 @@ __marimo__/
 # MySQL Data (Docker Volume을 로컬 폴더로 지정할 경우)
 mysql_data/
 
+# 엑셀 데이터
+*.xlsx
+
 # IDE 설정 파일
 .vscode/
 .idea/
