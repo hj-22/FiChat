@@ -23,7 +23,7 @@ DB_HOST = os.getenv("SUPABASE_HOST")
 DB_PASSWORD = os.getenv("SUPABASE_PASSWORD")
 DB_NAME = os.getenv("SUPABASE_NAME")
 DB_USER = os.getenv("SUPABASE_USER")
-DB_PORT = os.getenv("SUPABASE_USER", "5432") # 환경변수에 없으면 5432 사용
+DB_PORT = os.getenv("SUPABASE_PORT", "5432") # 환경변수에 없으면 5432 사용
 
 # 비밀번호 파싱, URL 생성
 PW_PARSED = urllib.parse.quote_plus(DB_PASSWORD) if DB_PASSWORD else ""
@@ -33,13 +33,13 @@ def get_engine():
     return create_engine(DB_URL)
 
 # 데이터 로드 함수: 엔진을 내부 호출로 변경. 쿼리만 넣어도 작동 가능
-def get_data(query):
+def get_data(query, params=None):
     engine = get_engine()
     try:
         # 커넥션을 명시적으로 열고 닫는 것이 권장된다고 함.(with 구문)
         with engine.connect() as conn:
-            df = pd.read_sql(query, conn)
-            print("데이터 로드 완료!")
+            df = pd.read_sql(query, conn, params=params)
+            # print("데이터 로드 완료!")
             return df
     except Exception as e:
         print(f"데이터 로드 실패: {e}")
