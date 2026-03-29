@@ -1,6 +1,24 @@
-def risk_preference_question(age, period, experience, psychology, loss_level, finance_knowledge,
-                             investment_goal, rate_of_investment, expected_income):
+from models import SurveyAnswers, User
+
+# 성향 텍스트 return
+def risk_preference_question(answers: SurveyAnswers) -> str:
+    """
+    설문 응답을 받아서 투자 성향을 계산합니다.
+    """
     score = 0
+
+    # 값 꺼내기
+    age = answers['age']
+    period = answers['period']
+    experience = answers['experience']
+    psychology = answers['psychology']
+    loss_level = answers['loss_level']
+    finance_knowledge = answers['finance_knowledge']
+    investment_goal = answers['investment_goal']
+    rate_of_investment = answers['rate_of_investment']
+    expected_income = answers['expected_income']
+
+
     #나이
     if age >= 19 and age <= 34:
         score += 10
@@ -110,3 +128,33 @@ def risk_preference_question(age, period, experience, psychology, loss_level, fi
         if loss_level == 2:
             return "위험중립형"
         return "공격투자형"
+
+
+# 투자 성향별 배분
+def asset_allocation(risk_preference: str) -> float:
+    #원리금 보장
+    weights = {
+        "안정형": 0.85,
+        "안정추구형": 0.75,
+        "위험중립형": 0.60, 
+        "적극투자형": 0.45,
+        "공격투자형": 0.30
+    }
+    return weights.get(risk_preference, 0.85)
+
+
+# 전체 input반영한 유저 프로필 만들기
+def build_user_profile(answers: SurveyAnswers) -> User:
+    """
+    사용자의 응답을 바탕으로 유저 프로필을 생성합니다.
+    """
+    # 투자성향
+    risk_preference = risk_preference_question(answers)
+    # 자산배분비율
+    grnt_ratio = asset_allocation(risk_preference)
+
+    return {
+        **answers,
+        "risk_preference": risk_preference,
+        "grnt_ratio": grnt_ratio
+    }
