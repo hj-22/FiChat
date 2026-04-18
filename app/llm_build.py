@@ -1,3 +1,7 @@
+from user_profile import asset_allocation
+from recommender.engine import calculate_grnt_score, calculate_notgrnt_score, generate_reasons, generate_notgrnt_reasons
+
+
 ## 1단계 : 모든 로직을 묶어주는 래퍼(Wrapper) 함수 만들기
 # 함수들을 실행해서 추천한 portfolio를 만들어서 하나의 딕셔너리로 깔끔하게 묶어주는 역할
 def get_portfolio_recommendation(user_info, grnt_df, notgrnt_df, top_n=3):
@@ -289,3 +293,205 @@ embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L
 vectorstore = FAISS.from_documents(docs, embedding)
 
 print("✅ Vector DB(도서관) 구축 완료! 이제 챗봇을 실행해도 됩니다.")
+
+
+def retrieve_with_filter(user_query, candidate_ids, vectorstore):
+    """RAG 검색 시, 추천된 상품(candidate_ids) 안에서만 약관/상세정보를 찾도록 필터링합니다."""
+    retriever = vectorstore.as_retriever(
+        search_kwargs={
+            "k": 3,
+            # FAISS에서 메타데이터를 필터링하는 방식 (ID가 후보 리스트에 있는지 확인)
+            "filter": lambda metadata: metadata.get("product_id") in candidate_ids
+        }
+    )
+    return retriever.invoke(user_query)
+
+
+llm = ChatGroq(model="llama-3.3-70b-versatile")
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", """
+    너는 전문적이고 친절한 퇴직연금 AI 어드바이저다.
+
+    다음 규칙을 반드시 지켜라:
+    1. 상품명(예: TDF, ETF 등)이나 필수 금융 용어를 제외하고는 100% 자연스러운 한국어로 작성한다.
+    2. 한글과 영어를 제외한 문자는 무조건 사용해서는 안 된다. 해당 규칙을 어길 경우 잘못된 대답이다.
+    3. 고객에게 존댓말을 사용하며 신뢰감 있는 말투를 사용한다.
+    4. 제공된 [시스템 추천 사유]와 [검색된 상세 정보]만을 바탕으로 답변한다.
+    5. 고객의 질문에 직접적으로 답하면서, 왜 이 상품이 추천되었는지 명확히 설명한다.
+    """),
+        ("human", """
+    [고객 정보]
+    - 나이: {age}세
+    - 투자 성향: {risk_preference}
+    - 은퇴까지 남은 기간: {period}년
+
+    [고객의 실제 질문]
+    "{user_query}"
+
+    [추천 데이터 및 상세 정보]
+    {context}
+
+    위 정보를 바탕으로 고객의 질문에 완벽하게 답변해 주세요.
+    """)
+    ])
+
+# 딕셔너리 키값은 build_user_profile() 에서 만든 키값과 동일하게 맞췄습니다.
+chain = (
+    {
+        "context": lambda x: x["context"],
+        "age": lambda x: x["user"]["age"],
+        "risk_preference": lambda x: x["user"]["risk_preference"],
+        "period": lambda x: x["user"]["period"],
+        "user_query": lambda x: x["user_query"]
+    }
+    | prompt
+    | llm
+)
+
+# ==========================================
+# 4. 최종 RAG 파이프라인 (rag_pipeline)
+# ==========================================
+def rag_pipeline(user_query, user, portfolio, vectorstore):
+
+    # 🔥 0️⃣ 추천 요청인지 판단
+    is_recommendation = user_query.strip() in ["추천", "추천해주세요", "상품 추천", "포트폴리오 추천"]
+
+    # 🔥 1️⃣ 기본 portfolio context 생성
+    portfolio_context = build_portfolio_context(portfolio)
+
+    # 🔥 2️⃣ 추천 상품 리스트
+    all_recs = portfolio["guaranteed"] + portfolio["non_guaranteed"]
+
+    candidate_ids = [
+        r["product_info"]["product_id"]
+        for r in all_recs
+    ]
+
+    # 🔥 3️⃣ RAG 검색
+    retrieved_docs = retrieve_with_filter(user_query, candidate_ids, vectorstore)
+    rag_text = "\n\n".join([d.page_content for d in retrieved_docs])
+
+    # 🔥 4️⃣ context 구성 (핵심 분기)
+    if is_recommendation:
+        # 👉 추천 요청이면 portfolio 중심
+        final_context = f"""
+        [추천 포트폴리오]
+        {portfolio_context}
+
+        [추가 정보]
+        {rag_text}
+        """
+    else:
+        # 👉 일반 질문이면 이유 + rag 중심
+        reason_text = "[시스템 추천 사유]\n"
+        for r in all_recs:
+            p_name = r["product_name"]
+            reasons = "\n  - ".join(r["reasons"])
+            reason_text += f"■ {p_name} (추천 점수: {r['score']}점)\n  - {reasons}\n\n"
+
+        final_context = f"""
+        {portfolio_context}
+
+        {reason_text}
+
+        [검색된 상세 정보]
+        {rag_text}
+        """
+
+    # 🔥 5️⃣ LLM 호출
+    result = chain.invoke({
+        "context": final_context,
+        "user": user,
+        "user_query": user_query
+    })
+
+    return result.content
+
+save_path = "/content/drive/MyDrive/FiChat/faiss_index"
+
+# 1. 임베딩 모델 준비
+embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+# 2. 저장해둔 도서관(faiss_index) 파일 불러오기
+# 주의: 최신 LangChain에서는 보안상 allow_dangerous_deserialization=True 를 꼭 적어줘야 합니다.
+vectorstore = FAISS.load_local(save_path, embedding, allow_dangerous_deserialization=True)
+
+def generate_questions(user, recs, vectorstore):
+
+    # 🔥 1️⃣ 리스트 합치기
+    all_recs = recs["guaranteed"] + recs["non_guaranteed"]
+
+    # 🔥 2️⃣ candidate_ids
+    candidate_ids = [
+        r["product_info"]["product_id"]
+        for r in all_recs
+    ]
+
+    # 🔥 3️⃣ RAG 검색
+    rag_docs = retrieve_with_filter(
+        "이 상품들의 특징과 차이",
+        candidate_ids,
+        vectorstore
+    )
+
+    rag_text = "\n".join([d.page_content for d in rag_docs])
+
+    # 🔥 4️⃣ 상품 이름
+    product_text = "\n".join([
+        r["product_name"] for r in all_recs
+    ])
+
+    # 🔥 5️⃣ LLM
+    res = llm.invoke(f"""
+    사용자 정보:
+    {user}
+
+    추천 상품:
+    {product_text}
+
+    상품 상세 정보:
+    {rag_text}
+
+    위 정보를 기반으로
+    사용자가 다음으로 물어볼 만한 질문 3개를 생성하세요.
+
+    조건:
+    - 반드시 질문 문장만 출력
+    - 설명 금지
+    - 번호 금지
+    - 중복 금지
+    - 구체적인 질문
+    - 무조건 한국어
+    - 한국어와 필요시 영어 사용을 제외한 다른 언어는 잘못된 출력값임
+    """).content
+
+    return [q.strip() for q in res.split("\n") if len(q) > 5][:3]
+
+
+def chatbot(user_input, user, session_id, vectorstore, top_n=5):
+
+    # 2. 추천
+    portfolio = get_portfolio_recommendation(user, grnt_df, notgrnt_df, top_n)
+
+
+    # 3. 🔥 RAG pipeline 호출
+    response = rag_pipeline(
+        user_query=user_input,
+        user=user,
+        portfolio=portfolio,
+        vectorstore=vectorstore
+    )
+
+    return response, user, portfolio
+
+import difflib
+
+# 퇴직연금사업자 목록 추출 (한 번만)
+all_operators = grnt_df["pension_operator"].dropna().unique().tolist()
+
+
+
+
+
+
