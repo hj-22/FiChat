@@ -3,8 +3,11 @@
 """
 from .engine import (
     get_categorized_products,
-    get_portfolio_recommendation,
     build_context,
     detect_intent,
     build_comparison_context
+)
+
+from .logic import(
+    get_portfolio_recommendation
 )
