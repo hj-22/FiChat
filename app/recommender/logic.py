@@ -1,6 +1,6 @@
 from user_profile import asset_allocation
-from guaranteed import calculate_grnt_score, generate_reasons
-from non_guaranteed import calculate_notgrnt_score, generate_notgrnt_reasons
+from .guaranteed import calculate_grnt_score, generate_reasons
+from .non_guaranteed import calculate_notgrnt_score, generate_notgrnt_reasons
 
 ## 1단계 : 모든 로직을 묶어주는 래퍼(Wrapper) 함수 만들기
 # 함수들을 실행해서 추천한 portfolio를 만들어서 하나의 딕셔너리로 깔끔하게 묶어주는 역할
@@ -33,7 +33,7 @@ def get_portfolio_recommendation(user_info, grnt_df, notgrnt_df, top_n=3):
     grnt_results = []
     for _, row in top_grnt.iterrows():
         # generate_reasons 파라미터에 scored_grnt 데이터프레임 전달
-        reasons = generate_reasons(row, user_info, scored_grnt)
+        reasons = generate_reasons(scored_grnt, row, user_info)
         grnt_results.append({
             "product_name": row["product_name"],
             "score": round(row["score"], 1),

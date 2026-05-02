@@ -14,7 +14,7 @@ class SurveyAnswers(TypedDict):
     loss_level: int
     finance_knowledge: int
     investment_goal: int
-    rate_of_investment: int
+    pension_ratio: int
     expected_income: int
     # --- 추가정보
     investment_amount: int

@@ -20,7 +20,7 @@ SURVEY_CONTENT = {
             "3. 손실 확대를 막기 위해 안전자산으로 옮긴다."
         ]
     },
-    "loss_tolerance": {
+    "loss_level": {
         "label": "감내 가능한 손실 수준은 어느 정도인가요?",
         "options": [
             "1. 원금 보존",
@@ -29,7 +29,7 @@ SURVEY_CONTENT = {
             "4. 수익이 높다면 위험은 상관 없음"
         ]
     },
-    "knowledge": {
+    "finance_knowledge": {
         "label": "투자상품을 선택할 때 본인 수준에 가장 가까운 것을 선택해주세요.",
         "options": [
             "1. 상품 구조와 위험을 직접 비교하고 투자 결정을 할 수 있다. (예: 수익률, 위험도, 수수료 비교)",
@@ -38,7 +38,7 @@ SURVEY_CONTENT = {
             "4. 상품 설명을 읽어도 이해하기 어려워 추천에 의존한다"
         ]
     },
-    "goal": {
+    "investment_goal": {
         "label": "주된 투자 목적은 무엇인가요?",
         "options": [
             "1. 자산 증식",
@@ -56,7 +56,7 @@ SURVEY_CONTENT = {
             "4. 70% 이상"
         ]
     },
-    "income_future": {
+    "expected_income": {
         "label": "향후 수입원에 대한 예상은 어떠신가요?",
         "options": [
             "1. 현재 소득이 일정하며, 향후 상당 기간 유지 또는 증가 예상",
@@ -79,11 +79,11 @@ SURVEY_STEPS = [
     {"key": "period", "label": "은퇴까지 남은 기간(년)", "type": "number"},
     {"key": "experience", "label": None, "type": "radio"},
     {"key": "psychology", "label": None, "type": "radio"},
-    {"key": "loss_tolerance", "label": None, "type": "radio"},
-    {"key": "knowledge", "label": None, "type": "radio"},
-    {"key": "goal", "label": None, "type": "radio"},
+    {"key": "loss_level", "label": None, "type": "radio"},
+    {"key": "finance_knowledge", "label": None, "type": "radio"},
+    {"key": "investment_goal", "label": None, "type": "radio"},
     {"key": "pension_ratio", "label": None, "type": "radio"},
-    {"key": "income_future", "label": None, "type": "radio"},
+    {"key": "expected_income", "label": None, "type": "radio"},
     {"key": "investment_amount", "label": "투자금액(DC 연금계좌에 적립된 퇴직금 금액/만원)", "type": "number"},
     {"key": "pension_operator", "label": "가입한 퇴직연금사업자", "type": "text_match"},
     {"key": "direct_manage", "label": None, "type": "radio"}

@@ -45,12 +45,12 @@ def build_portfolio_context(portfolio):
     context += "[원리금 보장형 추천]\n"
     for i, p in enumerate(portfolio["guaranteed"]):
         reasons_text = ", ".join(p["reasons"])
-        context += f"{i+1}위. {p['name']} (점수: {p['score']}점) - 특징: {reasons_text}\n"
+        context += f"{i+1}위. {p['product_name']} (점수: {p['score']}점) - 특징: {reasons_text}\n"
 
     context += "\n[실적 배당형(비보장형) 추천]\n"
-    for i, p in enumerate(portfolio["not_guaranteed"]):
+    for i, p in enumerate(portfolio["non_guaranteed"]):
         reasons_text = ", ".join(p["reasons"])
-        context += f"{i+1}위. {p['name']} (점수: {p['score']}점) - 특징: {reasons_text}\n"
+        context += f"{i+1}위. {p['product_name']} (점수: {p['score']}점) - 특징: {reasons_text}\n"
 
     return context
 
