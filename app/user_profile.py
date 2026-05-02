@@ -15,7 +15,7 @@ def risk_preference_question(answers: SurveyAnswers) -> str:
     loss_level = answers['loss_level']
     finance_knowledge = answers['finance_knowledge']
     investment_goal = answers['investment_goal']
-    rate_of_investment = answers['rate_of_investment']
+    pension_ratio = answers['pension_ratio']
     expected_income = answers['expected_income']
 
 
@@ -96,11 +96,11 @@ def risk_preference_question(answers: SurveyAnswers) -> str:
         score += 1
 
     #전체 노후 자산 중에서 퇴직연금이 차지하는 비중
-    if rate_of_investment == 1:
+    if pension_ratio == 1:
         score += 10
-    elif rate_of_investment == 2:
+    elif pension_ratio == 2:
         score += 7
-    elif rate_of_investment == 3:
+    elif pension_ratio == 3:
         score += 4
     else:
         score += 1
