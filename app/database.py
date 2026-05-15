@@ -5,6 +5,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
+import streamlit as st
+
 def get_env_path():
     curr = Path(__file__).resolve()
     # .env 파일 찾아 올라가기 / 최대5회
@@ -19,11 +21,11 @@ if env_path:
     load_dotenv(dotenv_path=env_path)
 
 # DB설정 정보
-DB_HOST = os.getenv("SUPABASE_HOST")
-DB_PASSWORD = os.getenv("SUPABASE_PASSWORD")
-DB_NAME = os.getenv("SUPABASE_NAME")
-DB_USER = os.getenv("SUPABASE_USER")
-DB_PORT = os.getenv("SUPABASE_PORT", "5432") # 환경변수에 없으면 5432 사용
+DB_HOST = st.secrets.get("SUPABASE_HOST") or os.getenv("SUPABASE_HOST")
+DB_PASSWORD = st.secrets.get("SUPABASE_PASSWORD") or os.getenv("SUPABASE_PASSWORD")
+DB_NAME = st.secrets.get("SUPABASE_NAME") or os.getenv("SUPABASE_NAME")
+DB_USER = st.secrets.get("SUPABASE_USER") or os.getenv("SUPABASE_USER")
+DB_PORT = st.secrets.get("SUPABASE_PORT") or os.getenv("SUPABASE_PORT", "5432") # 환경변수에 없으면 5432 사용
 
 # 비밀번호 파싱, URL 생성
 PW_PARSED = urllib.parse.quote_plus(DB_PASSWORD) if DB_PASSWORD else ""
