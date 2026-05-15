@@ -222,3 +222,6 @@ Thumbs.db
 
 # 환경 변수 (비밀번호 등)
 .env
+
+# 그외
+upload_excel.py
