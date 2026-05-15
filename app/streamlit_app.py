@@ -24,7 +24,7 @@ env_path = get_env_path()
 if env_path:
     load_dotenv(dotenv_path=env_path)
 
-api_key = os.getenv("GROQ_API_KEY")
+api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if "user" not in st.session_state:
     st.session_state.user = {
