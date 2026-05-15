@@ -45,4 +45,5 @@ def get_data(query, params=None):
             return df
     except Exception as e:
         print(f"데이터 로드 실패: {e}")
+        st.error(f"데이터 로드 실패: {e}")
         return pd.DataFrame()

@@ -225,3 +225,6 @@ Thumbs.db
 
 # 그외
 upload_excel.py
+
+# 테스트용 빈 secrets
+.streamlit/

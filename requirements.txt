@@ -14,3 +14,9 @@ sentence-transformers
 faiss-cpu
 
 typing-extensions
+
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+sentence-transformers

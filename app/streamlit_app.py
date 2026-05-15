@@ -55,7 +55,8 @@ def main():
     except Exception as e:
         # 로그만 남기고 프로그램은 계속 진행
         st.error("사업자 정보를 불러오는 중 문제가 발생했습니다.")
-        # print(f"DB Error: {e}")
+        # 테스트용 로그
+        st.error(f"DB Error: {e}")
         # DB연결 실패시에도 오류 없게 빈 리스트
         all_operators = []
 
