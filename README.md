@@ -1,6 +1,8 @@
 # FiChat — DC형 퇴직연금 맞춤 상품 추천 챗봇
 
-![Streamlit App](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://fichat.streamlit.app)
+> 무료 호스팅 환경이라 첫 접속 시 앱 구동에 시간이 걸리며, 추천 계산과 챗봇 응답도 다소 느릴 수 있습니다.
+
 
 DC형 퇴직연금 가입자를 위한 AI 기반 맞춤형 금융상품 추천 챗봇.  
 투자성향 설문 → 상품 필터링 → 점수 기반 추천 → LLM 대화형 설명의 파이프라인으로 구성.
